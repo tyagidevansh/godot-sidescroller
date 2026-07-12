@@ -4,6 +4,7 @@ var current_speed = 400.0
 const JUMP_VELOCITY = -700.0 
 const GRAVITY = 1600.0
 
+@onready var animated_sprite = $AnimatedSprite2D
 const MAX_JUMPS = 2 
 var jumps_left = MAX_JUMPS
 var is_jumping = false
@@ -29,7 +30,7 @@ func _physics_process(delta):
 		coyote_timer -= delta 
 		velocity.y += GRAVITY * delta
 
-	if Input.is_action_just_pressed("ui_accept"):
+	if Input.is_action_just_pressed("jump"):
 		if coyote_timer > 0.0:
 			velocity.y = JUMP_VELOCITY
 			jumps_left -= 1
@@ -41,10 +42,15 @@ func _physics_process(delta):
 			is_jumping = true
 			
 
-	if Input.is_action_just_released("ui_accept") and velocity.y < 0 and is_jumping:
+	if Input.is_action_just_released("jump") and velocity.y < 0 and is_jumping:
 		velocity.y *= 0.5 
 
 	velocity.x = current_speed
+	
+	if is_on_floor():
+		animated_sprite.play("default")
+	else:
+		animated_sprite.play("jump")
 
 	move_and_slide()
 

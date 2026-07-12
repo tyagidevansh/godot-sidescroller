@@ -2,9 +2,24 @@
 
 [ext_resource type="Script" uid="uid://c2tdo6qyngqoh" path="res://scripts/main.gd" id="1_m"]
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="2_m"]
+[ext_resource type="Script" path="res://scripts/background.gd" id="3_m"]
+[ext_resource type="PackedScene" path="res://scenes/driller.tscn" id="4_m"]
 
 [node name="Main" type="Node2D" unique_id=111472371]
 script = ExtResource("1_m")
+
+[node name="Background" type="CanvasLayer" parent="."]
+layer = -1
+script = ExtResource("3_m")
+
+[node name="TextureRect" type="TextureRect" parent="Background"]
+stretch_mode = 1
+size = Vector2(2688, 768)
+modulate = Color(0.75, 0.75, 0.85, 1.0)
+
+
+[node name="Driller" parent="." instance=ExtResource("4_m")]
+position = Vector2(-200, 180)
 
 [node name="Player" parent="." unique_id=990221418 instance=ExtResource("2_m")]
 position = Vector2(100, 200)
@@ -14,13 +29,30 @@ position = Vector2(550, 300)
 
 [node name="HUD" type="CanvasLayer" parent="." unique_id=609511745]
 
-[node name="ScoreLabel" type="Label" parent="HUD" unique_id=154266358]
+[node name="CrystalLabel" type="Label" parent="HUD"]
 offset_left = 20.0
-offset_top = 20.0
+offset_top = 16.0
 offset_right = 200.0
 offset_bottom = 50.0
-theme_override_font_sizes/font_size = 32
-text = "Score: 0"
+theme_override_colors/font_color = Color(0.85, 0.45, 1.0, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 28
+text = "x0"
+
+[node name="ScoreLabel" type="Label" parent="HUD" unique_id=154266358]
+offset_left = 900.0
+offset_top = 16.0
+offset_right = 1140.0
+offset_bottom = 50.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 28
+horizontal_alignment = 2
+text = "0"
 
 [node name="GameOver" type="Control" parent="HUD" unique_id=628459875]
 visible = false
@@ -31,30 +63,30 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="ColorRect" type="ColorRect" parent="HUD/GameOver" unique_id=2113515736]
+[node name="BG" type="ColorRect" parent="HUD/GameOver"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0, 0, 0, 0.5)
+color = Color(0.0, 0.0, 0.0, 0.72)
 
-[node name="Label" type="Label" parent="HUD/GameOver" unique_id=772190807]
+[node name="TitleLabel" type="Label" parent="HUD/GameOver"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -100.0
-offset_top = -50.0
-offset_right = 100.0
-offset_bottom = 10.0
+offset_left = -180.0
+offset_top = -70.0
+offset_right = 180.0
+offset_bottom = -10.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_colors/font_color = Color(1, 0, 0, 1)
-theme_override_font_sizes/font_size = 48
+theme_override_colors/font_color = Color(1, 0.3, 0.1, 1)
+theme_override_font_sizes/font_size = 56
 text = "GAME OVER"
 horizontal_alignment = 1
 
@@ -65,13 +97,13 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -70.0
+offset_left = -80.0
 offset_top = 30.0
-offset_right = 70.0
+offset_right = 80.0
 offset_bottom = 80.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 26
 text = "RESTART"
 
 [connection signal="pressed" from="HUD/GameOver/RestartButton" to="." method="restart_game"]

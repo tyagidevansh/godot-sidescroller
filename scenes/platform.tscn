@@ -1,15 +1,13 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/platform.gd" id="1_pf"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_pf"]
-size = Vector2(500, 40)
+size = Vector2(500, 20)
 
 [node name="Platform" type="StaticBody2D"]
-
-[node name="ColorRect" type="ColorRect" parent="."]
-offset_right = 500.0
-offset_bottom = 40.0
-color = Color(0.2, 0.8, 0.2, 1)
+script = ExtResource("1_pf")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(250, 20)
+position = Vector2(250, 10)
 shape = SubResource("RectangleShape2D_pf")
