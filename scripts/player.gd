@@ -47,6 +47,12 @@ func _physics_process(delta):
 
 	velocity.x = current_speed
 	
+	if mistakes > 0 and not is_dead:
+		mistake_recovery_timer += delta
+		if mistake_recovery_timer >= 15.0:
+			mistakes -= 1
+			mistake_recovery_timer = 0.0
+	
 	if is_on_floor():
 		animated_sprite.play("default")
 	else:
@@ -56,3 +62,14 @@ func _physics_process(delta):
 
 func die():
 	is_dead = true
+
+var mistakes: int = 0
+var mistake_recovery_timer: float = 0.0
+
+func hit_by_enemy():
+	mistakes += 1
+	mistake_recovery_timer = 0.0
+	
+	animated_sprite.modulate = Color(1, 0, 0)
+	var tween = create_tween()
+	tween.tween_property(animated_sprite, "modulate", Color(1, 1, 1), 0.2)

@@ -19,18 +19,26 @@ var crystals_collected = 0
 enum Zone { BLUE, BLACK }
 var current_zone: Zone = Zone.BLUE
 var zone_end_x:   float = 10000.0         # first zone: ~20s at 500px/s
-# Blue zone → platform styles 0 (industrial) or 1 (blue stone)
-# Black zone → platform style 2 (lava/rust) only
-var zone_styles := [0, 1]
+# Blue zone -> platform style 1 (blue stone)
+# Black zone -> platform styles 0 (orange industrial) or 2 (lava)
+var zone_styles := [1]
 
 func _ready():
 	player = $Player
 	camera = $Camera2D
 
-	spawn_platform(0.0, 380.0, 1100.0, false)
+	if current_zone == Zone.BLUE:
+		zone_styles = [1]
+	else:
+		zone_styles = [0, 2]
+	$Background.zone_changed.connect(_on_zone_changed)
+
+	spawn_platform(0.0, 380.0, 1100.0, false, zone_styles[0])
 	last_spawn_x = 1100.0
 	for i in range(6):
 		generate_next_platform()
+
+var current_camera_offset: float = 150.0
 
 func _process(delta):
 	if player == null:
@@ -44,19 +52,16 @@ func _process(delta):
 		$HUD/ScoreLabel.text = str(dist_score + crystals_collected * 10)
 		$HUD/CrystalLabel.text = "x" + str(crystals_collected)
 
-		# Camera: X follows player, Y smoothly tracks player so jumps feel natural
-		# Camera shows 250px ahead — player sits at ~55% of screen width
-		# giving a good view of the driller on the left.
-		camera.position.x = player.position.x + 250.0
+		# Camera tracking with mistakes logic
+		var target_camera_offset = 150.0 + (player.mistakes * 150.0)
+		current_camera_offset = lerp(current_camera_offset, target_camera_offset, delta * 2.0)
+		
+		camera.position.x = player.position.x + current_camera_offset
 		var target_y = lerp(camera.position.y, player.position.y - 30.0, delta * 4.0)
 		camera.position.y = clamp(target_y, 150.0, 550.0)
 
 	elif not $HUD/GameOver.visible:
 		$HUD/GameOver.visible = true
-
-	# Zone boundary check
-	if not player.is_dead and player.position.x > zone_end_x:
-		_advance_zone()
 
 	while last_spawn_x < player.position.x + SPAWN_AHEAD_DISTANCE:
 		generate_next_platform()
@@ -119,7 +124,7 @@ func spawn_platform(x_pos: float, y_pos: float, p_width: float, can_decorate: bo
 	if not can_decorate:
 		return
 
-	if spawn_enemy and p_width > 450.0 and randf() > 0.75:
+	if spawn_enemy and p_width > 400.0 and randf() > 0.50:
 		var e = enemy_scene.instantiate()
 		e.position = Vector2(randf_range(80.0, p_width - 80.0), -30.0)
 		p.add_child(e)
@@ -137,17 +142,19 @@ func spawn_platform(x_pos: float, y_pos: float, p_width: float, can_decorate: bo
 func _on_crystal_collected():
 	crystals_collected += 1
 
-func _advance_zone() -> void:
-	# Blue zone: ~20 seconds. Black zone: ~10 seconds. At average 500px/s.
-	if randf() < 0.667:
-		current_zone = Zone.BLUE
-		zone_styles = [0, 1]
-		zone_end_x = player.position.x + randf_range(8000.0, 14000.0)
+func _on_zone_changed(new_zone: int) -> void:
+	current_zone = new_zone
+	if current_zone == Zone.BLUE:
+		zone_styles = [1]
 	else:
-		current_zone = Zone.BLACK
-		zone_styles = [2]
-		zone_end_x = player.position.x + randf_range(4000.0, 7000.0)
-	$Background.switch_zone(current_zone)
+		zone_styles = [0, 2]
+	
+	# Update any platforms that were already spawned ahead of the player!
+	for p in active_platforms:
+		if p.position.x > player.position.x:
+			var new_style = zone_styles[randi() % zone_styles.size()]
+			# collision.shape.size.x contains the width of the platform
+			p.setup_platform(p.get_node("CollisionShape2D").shape.size.x, new_style)
 
 func restart_game():
 	get_tree().reload_current_scene()

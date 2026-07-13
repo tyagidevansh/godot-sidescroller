@@ -21,6 +21,11 @@ func setup_platform(requested_width: float, style: int = 0):
 	var edge_col    = s[2] as Color
 	var rivet_col   = s[3] as Color
 
+	# Clear any existing visual rects if we are updating style dynamically
+	for child in get_children():
+		if child is ColorRect:
+			child.queue_free()
+
 	var glow = ColorRect.new()
 	glow.color = glow_col
 	glow.size = Vector2(requested_width, 3)
